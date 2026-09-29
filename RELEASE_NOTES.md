@@ -1,4 +1,4 @@
-## 0.3.0 - 2026-09-25
+## 0.3.0 - 2026-09-29
 
 ### ♻️ Refactoring
 
@@ -10,6 +10,7 @@
 - Add global workspace toggle (#368)
 - Unify PRD and TechSpec into a single spec pipeline (#397)
 - Quiet the Context rail and sessions row for everyday use (#649)
+- Retire Network, managed Sandbox, and Bridges (#681)
 
 ### ⚡ Performance Improvements
 
@@ -79,6 +80,7 @@
 - Give rendered Markdown a readable visual hierarchy (#660)
 - Add safe bulk worktree cleanup to workspace lists (#656)
 - Add provider-neutral ACP full-access preference (#674)
+- Calmer, plain-language web UI for everyday users (#683)
 
 ### 🐛 Bug Fixes
 
@@ -353,6 +355,34 @@ auto_commit = false
 - `compozy spawn` now accepts provider, model, reasoning-effort, and speed overrides, so orchestrated workers preserve the complete runtime choice.
 - Goal output contracts now require the runtime's `complete|blocked` vocabulary, and Goal prompts receive the authored output schema.
 - The standalone `orchestrate-tasks` Loop and its docs/catalog entry are removed. Operator-side `[loops.inputs.orchestrate-tasks]` config blocks are now inert and should be deleted; move any desired values under `[loops.inputs.implement-tasks]` and set `mode = "orchestrated"`.
+
+##### Remove Network, Bridges, and managed Sandbox products
+
+CompozyOS now centers on local agent sessions, Tasks, Loops, memory, and explicit Gateway access.
+Network, Bridges, and managed Sandbox capabilities are removed from all product surfaces with no
+compatibility aliases. HEARTBEAT, SOUL, Task autonomy, Goal nodes, session supervision, attention
+notifications, task status cursors, and provider-native execution policies remain supported.
+
+### Migration
+
+Back up the daemon state and workspace `.compozy/` directories before upgrading. Export any retired
+product history using the previous release first. Migration `00121_retire_network_bridges_sandbox.sql`
+permanently drops Network state and wake runs, Bridge instances/routes/deliveries and task subscriptions,
+notification presets/delivery permits, Network-actor triage state, and retired fields on retained records. It clears retained Task
+references to removed Network wake runs and removes Loop channel-message events. Retained local sessions,
+Tasks, ordinary runs, workspaces, memory, SOUL, and HEARTBEAT state are preserved.
+
+Remove Network, Bridges, and managed Sandbox configuration and request fields. Port scripts and extensions
+to the current CLI, routes, tools, and SDK; no replacement messaging or remote Sandbox feature is provided.
+Gateway requirements move to `[gateway]` with `gateway.private` / `gateway.public` permission atoms,
+`gateway_requirement_digest`, and `--confirm-gateway-requirement` / `confirm_gateway_digest` confirmation.
+The previous Gateway consent tuple remains recorded. Legacy `network_participation` manifests must
+be rebuilt with `[gateway]` and their new requirement digest confirmed; no legacy manifest conversion
+or implicit Gateway authorization is provided.
+
+There is no in-place downgrade. Restore a complete pre-upgrade backup before running an older binary.
+See the [migration guide](https://compozy.com/docs/migration#networks-bridges-and-sandbox-removal) for the
+state disposition and integration changes.
 
 ##### The desktop app is now Electron
 
